@@ -46,6 +46,9 @@ while row_index < len(rows):
     product_type = row[header_map["Type"]].strip()
     thumbnail_url = row[header_map["Image"]].strip() if row[header_map["Image"]] != "No Image" else None
     tiered_pricing = row[header_map["Fixed Tiered Prices"]].strip()
+    short_description = '<p> .checkmark {font-weight: bold;  margin-top: 0px;margin-bottom: 0px;}.light-text {font-weight: normal;font-size: smaller;color: #888;</p>\n<p class="checkmark" style="margin-top: 20px">✓ PLATA LA LIVRARE</p>\n<p class="light-text">platesti la livrarea coletului</p>\n<p class="checkmark">✓ VERIFICARE COLET</p>\n<p class="light-text">la solicitarea clientului</p>\n<p class="checkmark">✓ RETUR IN 14 DE ZILE</p>\n<p class="light-text">garantat banii inapoi</p>\n'
+    product_ean = row[header_map["EAN"]].strip()
+    meta_data = [ {"key": "_alg_ean", "value": product_ean} if product_ean else None ]
     
     if product_type == "variation":
         # Skip variations for now
@@ -58,7 +61,9 @@ while row_index < len(rows):
         "type": product_type,
         "regular_price": str(product_price),
         "images": [{"src": thumbnail_url}] if thumbnail_url else [],
-        "tiered_pricing_fixed_rules": tiered_pricing
+        "tiered_pricing_fixed_rules": tiered_pricing,
+        "short_description": short_description,
+        "meta_data": meta_data,
     }
     
     #pprint(update_data)
@@ -116,7 +121,9 @@ while row_index < len(rows):
                 "regular_price": str(variation_price),
                 "name": variation_name,
                 "sku": variation_sku + "-" + str(row_index - initial_row_index),
-                "tiered_pricing_fixed_rules": variation_tiered_pricing
+                "tiered_pricing_fixed_rules": variation_tiered_pricing,
+                "short_description": short_description,
+                "meta_data": meta_data,
             }        
             
             #pprint(variation_data)    
