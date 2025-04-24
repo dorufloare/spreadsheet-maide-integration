@@ -46,7 +46,21 @@ while row_index < len(rows):
     product_type = row[header_map["Type"]].strip()
     thumbnail_url = row[header_map["Image"]].strip() if row[header_map["Image"]] != "No Image" else None
     tiered_pricing = row[header_map["Fixed Tiered Prices"]].strip()
-    short_description = '<p> .checkmark {font-weight: bold;  margin-top: 0px;margin-bottom: 0px;}.light-text {font-weight: normal;font-size: smaller;color: #888;</p>\n<p class="checkmark" style="margin-top: 20px">✓ PLATA LA LIVRARE</p>\n<p class="light-text">platesti la livrarea coletului</p>\n<p class="checkmark">✓ VERIFICARE COLET</p>\n<p class="light-text">la solicitarea clientului</p>\n<p class="checkmark">✓ RETUR IN 14 DE ZILE</p>\n<p class="light-text">garantat banii inapoi</p>\n'
+    short_description = '''
+    <p style="font-weight: bold; margin-top: 20px; margin-bottom: 0px;">✓ PLATA LA LIVRARE</p>
+    <p style="font-weight: normal; font-size: smaller; color: #888888; margin-top: 0px; margin-bottom: 10px;">
+    platesti la livrarea coletului</p>
+
+    <p style="font-weight: bold; margin-top: 10px; margin-bottom: 0px;">✓ VERIFICARE COLET</p>
+    <p style="font-weight: normal; font-size: smaller; color: #888888; margin-top: 0px; margin-bottom: 10px;">
+    la solicitarea clientului</p>
+
+    <p style="font-weight: bold; margin-top: 10px; margin-bottom: 0px;">✓ RETUR IN 14 ZILE</p>
+    <p style="font-weight: normal; font-size: smaller; color: #888888; margin-top: 0px;">
+    garantat banii inapoi</p>
+    '''
+
+                            
     product_ean = row[header_map["EAN"]].strip()
     meta_data = [ {"key": "_alg_ean", "value": product_ean} if product_ean else None ]
     
@@ -101,7 +115,8 @@ while row_index < len(rows):
         existing_variations_names = set()
 
         for variation in existing_variations:
-            existing_variations_names.add(product_name + " - " + variation["attributes"][0]["option"])
+            if len(variation["attributes"]) > 0:
+                existing_variations_names.add(product_name + " - " + variation["attributes"][0]["option"])
         
         initial_row_index = row_index + 1
         row_index += 1
@@ -110,6 +125,7 @@ while row_index < len(rows):
             variation_sku = v_row[header_map["SKU"]].strip()
             
             if not variation_sku.startswith(product_sku):
+                row_index += 1 
                 break
             
             variation_price = v_row[header_map["Price"]].strip()
@@ -120,7 +136,7 @@ while row_index < len(rows):
             variation_data = {
                 "regular_price": str(variation_price),
                 "name": variation_name,
-                "sku": variation_sku + "-" + str(row_index - initial_row_index),
+                "sku": product_sku + "-" + str(row_index - initial_row_index),
                 "tiered_pricing_fixed_rules": variation_tiered_pricing,
                 "short_description": short_description,
                 "meta_data": meta_data,
@@ -136,7 +152,6 @@ while row_index < len(rows):
                         existing_variation[key] = variation_data[key]
                         
                 response = wcapi.put(f"products/{product_id}/variations/{variation_id}", existing_variation)
-                print(response.json())
                 if response.status_code == 200:
                     print(f"Variation {variation_id} updated successfully.")
                 else:
@@ -149,4 +164,4 @@ while row_index < len(rows):
                 else:
                     print(f"Failed to create variation {variation_name}. Status code: {response.status_code}")
 
-    row_index += 1
+            row_index += 1
