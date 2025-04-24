@@ -37,14 +37,14 @@ def webhook():
         print("❌ Invalid webhook signature")
         return "Invalid signature", 403
 
-    os.system("python fetch.py")  
+    os.system("python3 fetch.py")  
     
     return "Webhook received", 200
 
 @app.route('/run_push', methods=['GET'])
 def run_push():
     print("🚀 Push triggered via /run_push")
-    os.system("python push.py")
+    os.system("python3 push.py")
     return "Push started", 200
 
 if __name__ == "__main__":
